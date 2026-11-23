@@ -392,12 +392,27 @@ body.view-home .adm-home{display:block}
 @keyframes rodadaBrilho{0%,100%{background-position:100% 0}50%{background-position:0 0}}
 @media (prefers-reduced-motion:reduce){.col-label{animation:none}}
 @media (max-width:720px){.col-label{font-size:10.5px!important;letter-spacing:.14em!important;padding:6px 12px}}
+/* ===== botão ADMIN em cima dos campeonatos (fora da tabela) ===== */
+.adm-entrar{display:flex;justify-content:flex-end;margin:12px 4px 0}
+#adminDot{position:static!important;display:inline-block}
+body.admin .adm-entrar{display:none}
+#adminBar{position:absolute!important}
+/* ===== celular: puxar para o lado passa rodada por rodada e as abas acompanham ===== */
+.fases button.ativa{background:var(--gold);color:#241b06;border-color:var(--gold)}
+@media (max-width:720px){
+  .bracket-scroll{scroll-snap-type:x proximity;scroll-padding:0 12px}
+  .colw,.col.center{scroll-snap-align:start}
+  .col.center{scroll-snap-align:center}
+  .fases{position:sticky;top:0;z-index:20;flex-wrap:nowrap;margin:10px -8px 0;padding:8px;background:linear-gradient(#062833 70%,rgba(6,40,51,0))}
+  .fases button{flex:1;padding:9px 6px;font-size:12px;white-space:nowrap}
+}
 </style>
 </head>
 <body class="view-home">
 
 <section id="home">
   <div class="topbar"><span class="logo"></span><span class="topbar-t">Futvôlei · Campeonatos</span></div>
+  <div class="adm-entrar"><button id="adminDot" type="button" aria-label="Entrar na área de administração">🔒 ADMIN</button></div>
   <h2 class="home-h">Qual campeonato está rolando?</h2>
   <p class="home-p">Escolha um campeonato para ver o chaveamento.</p>
   <div id="campGrid" class="grid"></div>
@@ -417,7 +432,7 @@ body.view-home .adm-home{display:block}
   <button type="button" data-fase="grp-f" class="fase-final">🏆 Grande Final</button>
   <button type="button" data-fase="grp-l">Perdedores</button>
 </nav>
-<p class="arraste">↔ Arraste para os lados para ver a chave inteira</p>
+<p class="arraste">👉 Puxe para o lado para passar as rodadas e as fases</p>
 
 <div class="bracket-scroll">
   <div id="bracket" aria-label="Chaveamento do torneio"></div>
@@ -425,8 +440,6 @@ body.view-home .adm-home{display:block}
 
 <footer><b id="footOrg"></b> · <span id="footNome"></span></footer>
 </div>
-
-<button id="adminDot" type="button" aria-label="Entrar na área de administração">🔒 ADMIN</button>
 
 <div id="adminBar">
   <button id="admToggle" type="button" aria-expanded="false" aria-controls="admMenu">⚙️ ADMIN <span class="adm-seta">▾</span></button>
@@ -895,6 +908,27 @@ document.querySelectorAll('.fases button').forEach((b) => b.addEventListener('cl
   const g = bracketEl.querySelector('.' + b.dataset.fase);
   if(g) g.scrollIntoView({behavior: 'smooth', block: 'nearest', inline: b.dataset.fase === 'grp-f' ? 'center' : 'start'});
 }));
+// a aba da fase que está na tela fica acesa enquanto a pessoa puxa a tabela para o lado
+(function(){
+  const sc = document.querySelector('.bracket-scroll'), bts = Array.from(document.querySelectorAll('.fases button'));
+  let pend = false;
+  function marcar(){
+    pend = false;
+    const r0 = sc.getBoundingClientRect(), cx = r0.left + r0.width / 2;
+    let melhor = null, dist = Infinity;
+    bts.forEach((b) => {
+      const g = bracketEl.querySelector('.' + b.dataset.fase); if(!g) return;
+      const r = g.getBoundingClientRect();
+      const d = cx < r.left ? r.left - cx : cx > r.right ? cx - r.right : 0;
+      if(d < dist){ dist = d; melhor = b; }
+    });
+    bts.forEach((b) => b.classList.toggle('ativa', b === melhor));
+  }
+  const agendar = () => { if(!pend){ pend = true; requestAnimationFrame(marcar); } };
+  sc.addEventListener('scroll', agendar, {passive: true});
+  window.addEventListener('resize', agendar);
+  window.marcarFase = agendar;
+})();
 // ---------- painel ADMIN (abre e fecha) ----------
 const admToggle = document.getElementById('admToggle'), admMenu = document.getElementById('admMenu');
 function painelAdmin(abrir){ admMenu.hidden = !abrir; admToggle.setAttribute('aria-expanded', String(abrir)); document.body.classList.toggle('adm-aberto', abrir); }
@@ -906,6 +940,7 @@ document.addEventListener('click', (e) => { if(!admMenu.hidden && !e.target.clos
 
 function render(){
   atualizarAoVivo();
+  if(window.marcarFase) setTimeout(window.marcarFase, 0);
   const P = compute();
   bracketEl.innerHTML = '';
   bracketEl.style.minWidth = ''; bracketEl.style.maxWidth = '';
