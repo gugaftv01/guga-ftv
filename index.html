@@ -19,11 +19,11 @@
 
   COMO USAR
   0) Os campeonatos da tela inicial ficam na lista CAMPEONATOS (mais abaixo).
-  1) Troque a senha em SENHA_ADMIN (mais abaixo no código).
+  1) O modo admin usa login do Firebase (e-mail e senha). Veja SEGURANCA.md.
   2) No Google Sites: Inserir → Incorporar → Incorporar código → cole
      TODO este arquivo. Sugestão de altura do quadro: ~680px.
   3) MODO ADMIN (escondido): clique na bolinha quase invisível no canto
-     inferior direito e digite a senha.
+     inferior direito e entre com o seu e-mail e senha.
        • EDITAR NOMES: clique em "Editar nomes", altere o nome de qualquer
          dupla e clique em "Salvar".
        • RESULTADOS: clique na dupla vencedora de cada jogo — o vencedor
@@ -119,6 +119,14 @@ body.admin #adminDot{display:none}
 .btn{flex:1;background:var(--gold);color:#241b06;border:none;padding:11px;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer}
 .btn.ghost{flex:0 0 auto;background:transparent;color:var(--gold-2);border:1px solid var(--gold-dim);padding-left:16px;padding-right:16px}
 #senhaMsg{color:#ff9d8a;font-size:12px;min-height:16px;margin-top:8px}
+#senhaMsg.ok{color:#9be8b4}
+#emailInput{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--gold-dim);background:#072530;color:var(--ink);font-size:15px;outline:none;margin-bottom:10px}
+#emailInput:focus{border-color:var(--gold)}
+.linkbtn{background:none;border:none;color:var(--gold-2);font-size:12px;text-decoration:underline;cursor:pointer;margin-top:12px;padding:0}
+.tent-lista{max-height:50vh;overflow:auto;margin-bottom:14px;font-size:13px;color:var(--ink)}
+.tent-lista div{padding:8px 0;border-bottom:1px solid rgba(242,193,78,.18)}
+.tent-lista b{color:var(--gold-2)}
+.tent-lista small{display:block;opacity:.75}
 .hint{color:var(--dim);font-size:11px;margin-top:8px}
 /* ---- editor de nomes ---- */
 #nomesLista{max-height:56vh;overflow-y:auto;display:grid;gap:6px;margin-bottom:12px;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--gold-dim) transparent}
@@ -314,17 +322,31 @@ body::after{animation:giraBolaCentro 45s linear infinite}
   <button id="nomesBtn">Editar nomes</button>
   <button id="sortearBtn" class="ghost">🎲 Sortear de novo</button>
   <button id="resetBtn" class="ghost">Recomeçar</button>
+  <button id="tentBtn" class="ghost">🔒 Tentativas</button>
   <button id="sairBtn" class="ghost">Sair</button>
+</div>
+
+<div id="tentPanel" class="panel" role="dialog" aria-modal="true" aria-label="Tentativas de login com senha errada">
+  <div class="card">
+    <h2>Senhas erradas</h2>
+    <div id="tentLista" class="tent-lista"></div>
+    <div class="row">
+      <button type="button" id="tentLimpar" class="btn ghost">Apagar histórico</button>
+      <button type="button" id="tentFechar" class="btn">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <div id="senhaPanel" class="panel" role="dialog" aria-modal="true" aria-label="Área do organizador">
   <form class="card" id="senhaForm">
     <h2>Área do organizador</h2>
-    <input type="password" id="senhaInput" placeholder="Senha" autocomplete="off" autofocus="">
+    <input type="email" id="emailInput" class="txt" placeholder="E-mail" autocomplete="username" autofocus="">
+    <input type="password" id="senhaInput" placeholder="Senha" autocomplete="current-password">
     <div class="row">
       <button type="submit" class="btn">Entrar</button>
       <button type="button" id="senhaFechar" class="btn ghost">Fechar</button>
     </div>
+    <button type="button" id="esqueciBtn" class="linkbtn">Esqueci a senha / primeiro acesso</button>
     <div id="senhaMsg"></div>
   </form>
 </div>
@@ -374,6 +396,7 @@ body::after{animation:giraBolaCentro 45s linear infinite}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 // ---- entrada no site: a bola gira por 10 segundos ----
 var T_INI = performance.now();
@@ -399,8 +422,8 @@ const DUPLAS = [
   {s:12, n:'Tato & Jequinha'}
 ];
 
-// Troque a senha do modo admin aqui:
-const SENHA_ADMIN = 'guga2026';
+// Modo admin: login com e-mail e senha do Firebase (não existe mais senha escrita no código).
+// Quem pode editar é definido nas regras do banco (arquivo database.rules.json).
 
 // Estado inicial embutido (resultados, placares e nomes). Deixe em uma única linha.
 const SAVED_STATE = {};
@@ -880,11 +903,12 @@ const nomesLista = document.getElementById('nomesLista');
 const nomesSalvar = document.getElementById('nomesSalvar');
 const nomesFechar = document.getElementById('nomesFechar');
 
+const emailInput = document.getElementById('emailInput');
 adminDot.addEventListener('click', () => {
-  senhaMsg.textContent = '';
+  senhaMsg.textContent = ''; senhaMsg.className = '';
   senhaInput.value = '';
   senhaPanel.classList.add('open');
-  senhaInput.focus();
+  (emailInput.value ? senhaInput : emailInput).focus();
 });
 document.getElementById('senhaFechar').addEventListener('click', () => senhaPanel.classList.remove('open'));
 senhaPanel.addEventListener('click', (e) => { if(e.target === senhaPanel) senhaPanel.classList.remove('open'); });
@@ -898,27 +922,80 @@ function tremerSenha(){
   setTimeout(() => card.classList.remove('tremer'), 650);
 }
 
+function entrarAdmin(){
+  adminMode = true;
+  document.body.classList.add('admin');
+  senhaPanel.classList.remove('open');
+  if(atual) render();
+  renderHome();
+}
+function aparelho(){
+  const u = navigator.userAgent || '';
+  const so = /Android/.test(u) ? 'Android' : /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Windows/.test(u) ? 'Windows' : /Mac OS/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Outro';
+  const nav = /SamsungBrowser/.test(u) ? 'Samsung Internet' : /Edg\//.test(u) ? 'Edge' : /Firefox\//.test(u) ? 'Firefox' : /Chrome\//.test(u) ? 'Chrome' : /Safari\//.test(u) ? 'Safari' : 'outro';
+  return so + ' · ' + nav;
+}
+function registrarSenhaErrada(email){
+  try{ firebase.database().ref('tentativas').push({email: String(email || '').slice(0, 100), aparelho: aparelho().slice(0, 100), quando: firebase.database.ServerValue.TIMESTAMP}); }catch(err){}
+}
 senhaForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  if(senhaInput.value === SENHA_ADMIN){
-    adminMode = true;
-    document.body.classList.add('admin');
-    senhaPanel.classList.remove('open');
-    if(atual) render();
-    renderHome();
-  } else {
-    senhaMsg.textContent = 'Senha incorreta.';
+  const email = emailInput.value.trim(), senha = senhaInput.value;
+  senhaMsg.className = '';
+  if(!email || !senha){ senhaMsg.textContent = 'Digite o e-mail e a senha.'; tremerSenha(); return; }
+  if(typeof firebase === 'undefined' || !firebase.auth){ senhaMsg.textContent = 'Sem internet. Tente de novo.'; return; }
+  senhaMsg.textContent = 'Entrando…';
+  firebase.auth().signInWithEmailAndPassword(email, senha).then(() => { senhaMsg.textContent = ''; entrarAdmin(); }).catch((err) => {
+    const cod = err && err.code || '';
+    senhaMsg.textContent = cod === 'auth/too-many-requests' ? 'Muitas tentativas. Espere alguns minutos.' : cod === 'auth/network-request-failed' ? 'Sem internet. Tente de novo.' : 'E-mail ou senha incorretos.';
     senhaInput.value = '';
     senhaInput.focus();
     tremerSenha();
-  }
+    if(cod !== 'auth/network-request-failed') registrarSenhaErrada(email);
+  });
+});
+document.getElementById('esqueciBtn').addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  senhaMsg.className = '';
+  if(!email){ senhaMsg.textContent = 'Digite o seu e-mail primeiro.'; emailInput.focus(); tremerSenha(); return; }
+  if(typeof firebase === 'undefined' || !firebase.auth){ senhaMsg.textContent = 'Sem internet. Tente de novo.'; return; }
+  firebase.auth().languageCode = 'pt-BR';
+  firebase.auth().sendPasswordResetEmail(email, {url: location.origin + location.pathname}).catch(() => {}).then(() => {
+    senhaMsg.className = 'ok';
+    senhaMsg.textContent = 'Te mandamos no e-mail um link para criar a senha nova (veja também o spam).';
+  });
 });
 
 sairBtn.addEventListener('click', () => {
   adminMode = false;
   document.body.classList.remove('admin');
+  try{ firebase.auth().signOut(); }catch(err){}
   if(atual) render();
   renderHome();
+});
+
+// histórico de senhas erradas (só o admin consegue ler)
+const tentPanel = document.getElementById('tentPanel'), tentLista = document.getElementById('tentLista');
+document.getElementById('tentBtn').addEventListener('click', () => {
+  tentLista.textContent = 'Carregando…';
+  tentPanel.classList.add('open');
+  firebase.database().ref('tentativas').orderByChild('quando').limitToLast(100).once('value').then((snap) => {
+    const l = []; snap.forEach((c) => { l.push(c.val()); });
+    l.reverse();
+    tentLista.textContent = '';
+    if(!l.length){ tentLista.textContent = 'Nenhuma senha errada registrada.'; return; }
+    l.forEach((t) => {
+      const d = document.createElement('div');
+      const b = document.createElement('b'); b.textContent = new Date(t.quando).toLocaleString('pt-BR');
+      const sm = document.createElement('small'); sm.textContent = 'E-mail digitado: ' + (t.email || '(vazio)') + ' · ' + (t.aparelho || '');
+      d.append(b, sm); tentLista.append(d);
+    });
+  }).catch(() => { tentLista.textContent = 'Não foi possível carregar.'; });
+});
+document.getElementById('tentFechar').addEventListener('click', () => tentPanel.classList.remove('open'));
+tentPanel.addEventListener('click', (e) => { if(e.target === tentPanel) tentPanel.classList.remove('open'); });
+document.getElementById('tentLimpar').addEventListener('click', () => {
+  firebase.database().ref('tentativas').remove().then(() => { tentLista.textContent = 'Histórico apagado.'; }).catch(() => { tentLista.textContent = 'Não foi possível apagar.'; });
 });
 
 // ---------- editor de nomes ----------
@@ -1297,11 +1374,14 @@ function nuvemPayload(){
   return JSON.parse(JSON.stringify(Object.assign({}, estados, {__camps: CAMPEONATOS.filter((c) => c.custom).map((c) => ({id: c.id, nome: c.nome}))})));
 }
 function nuvemAgendar(){
-  if(!nuvemRef) return;
+  if(!nuvemRef || !adminMode) return;   // só o organizador logado grava no banco
   clearTimeout(nuvemTimer);
   nuvemTimer = setTimeout(() => {
     nuvemTimer = null;
-    nuvemRef.set(nuvemPayload()).catch((e) => console.warn('Firebase: não foi possível salvar', e));
+    nuvemRef.set(nuvemPayload()).catch((e) => {
+      console.warn('Firebase: não foi possível salvar', e);
+      if(e && /permission/i.test(e.code || e.message || '')) alert('Não foi possível salvar: entre de novo na Área do organizador.');
+    });
   }, 250);
 }
 function nuvemAplicar(all){
@@ -1344,6 +1424,7 @@ function nuvemAtualizarTela(qtdAntes){
     if(typeof firebase === 'undefined'){ console.warn('Firebase não carregou (sem internet?). Usando só o salvamento local.'); return; }
     firebase.initializeApp(firebaseConfig);
     nuvemRef = firebase.database().ref('chaveamento');
+    firebase.auth().onAuthStateChanged((u) => { if(u && !adminMode) entrarAdmin(); });
     let primeiro = true;
     nuvemRef.on('value', (snap) => {
       const val = snap.val();

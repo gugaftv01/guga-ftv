@@ -22,7 +22,7 @@ Ou envie o arquivo novo pelo mesmo caminho do passo 3 (substitui o antigo).
 
 ## Banco de dados
 Os resultados ficam no Firebase (Realtime Database, projeto `guga-ftv`, caminho `chaveamento`).
-Confira em **Realtime Database > Regras** se a leitura e a gravação de `chaveamento` estão liberadas.
+As regras de segurança estão em `database.rules.json` (todo mundo vê, só o organizador logado grava). Veja `SEGURANCA.md`.
 
 ## Domínio próprio (opcional)
 Se um dia comprar um domínio (ex.: gugaftv01.com.br), crie um arquivo chamado `CNAME` nesta pasta
