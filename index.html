@@ -406,13 +406,43 @@ body.admin .adm-entrar{display:none}
   .fases{position:sticky;top:0;z-index:20;flex-wrap:nowrap;margin:10px -8px 0;padding:8px;background:linear-gradient(#062833 70%,rgba(6,40,51,0))}
   .fases button{flex:1;padding:9px 6px;font-size:12px;white-space:nowrap}
 }
+/* ===== administração: só aparece para o organizador, parada na página (não flutua) ===== */
+#adminBar{position:static!important;display:none!important;margin:14px 0 0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+body.admin #adminBar{display:block!important}
+#admMenu{position:static!important;width:auto!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important}
+.adm-ok{font-size:11px;color:var(--dim)}
+.adm-home{display:block!important;margin:0!important;text-align:left!important}
+body.admin{padding-top:0!important}
+#admCamp{display:none;max-width:760px;margin:14px auto 0;background:#0b2f38;border:1px solid var(--gold);border-radius:16px;padding:14px;position:relative;z-index:2}
+body.admin #admCamp{display:block}
+#admCamp h3{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+#admCamp .adm-btns{grid-template-columns:repeat(4,1fr)}
+#admCamp button{background:var(--gold);border:none;color:#241b06;font-weight:800;padding:10px 8px;border-radius:10px;cursor:pointer;font-size:13px}
+#admCamp button.ghost{background:transparent;color:var(--gold-2);border:1px solid var(--gold-dim)}
+#admCamp button#aoVivoBtn{background:transparent;color:var(--gold-2);border:1px solid var(--gold-dim)}
+#admCamp button#aoVivoBtn.on{background:#d42b2b;color:#fff;border-color:#ff7b7b}
+#admCamp .dica{color:var(--dim);font-size:12px;line-height:1.45;margin:10px 0 0}
+@media (max-width:720px){#admCamp .adm-btns{grid-template-columns:1fr 1fr}}
+body.admin input.pts-in{width:42px!important;min-width:42px!important;font-size:16px!important}
 </style>
 </head>
 <body class="view-home">
 
 <section id="home">
   <div class="topbar"><span class="logo"></span><span class="topbar-t">Futvôlei · Campeonatos</span></div>
-  <div class="adm-entrar"><button id="adminDot" type="button" aria-label="Entrar na área de administração">🔒 ADMIN</button></div>
+  <div id="adminBar">
+    <div id="admMenu" aria-label="Administração">
+      <div class="adm-topo"><b>⚙️ Administração</b><span class="adm-ok">Só você vê esta parte</span></div>
+      <p class="adm-home">Toque num campeonato abaixo para editar os nomes, o placar e ligar o AO VIVO.</p>
+      <section class="adm-sec">
+        <h3>Conta</h3>
+        <div class="adm-btns">
+          <button id="tentBtn" type="button" class="ghost">🔒 Segurança</button>
+          <button id="sairBtn" type="button" class="ghost">⏻ Sair</button>
+        </div>
+      </section>
+    </div>
+  </div>
   <h2 class="home-h">Qual campeonato está rolando?</h2>
   <p class="home-p">Escolha um campeonato para ver o chaveamento.</p>
   <div id="campGrid" class="grid"></div>
@@ -427,6 +457,16 @@ body.admin .adm-entrar{display:none}
   <div class="live-tag" id="liveEl" hidden>AO VIVO</div>
   <div class="vista-acoes"><button id="atletasBtn" type="button">👥 Ver atletas inscritos</button></div>
 </header>
+<section id="admCamp" aria-label="Administração deste campeonato">
+  <h3>⚙️ Administração deste campeonato</h3>
+  <div class="adm-btns">
+    <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
+    <button id="nomesBtn" type="button">✏️ Editar nomes</button>
+    <button id="sortearBtn" type="button" class="ghost">🎲 Sortear de novo</button>
+    <button id="resetBtn" type="button" class="ghost">↺ Recomeçar</button>
+  </div>
+  <p class="dica">Digite o placar direto na tabela: ele fica salvo na hora, mesmo com o jogo em andamento. Quando uma dupla chega a 18 (ou abre 2 pontos depois do 17x17), ela avança sozinha.</p>
+</section>
 <nav class="fases" aria-label="Ir para a fase">
   <button type="button" data-fase="grp-w">Vencedores</button>
   <button type="button" data-fase="grp-f" class="fase-final">🏆 Grande Final</button>
@@ -441,30 +481,6 @@ body.admin .adm-entrar{display:none}
 <footer><b id="footOrg"></b> · <span id="footNome"></span></footer>
 </div>
 
-<div id="adminBar">
-  <button id="admToggle" type="button" aria-expanded="false" aria-controls="admMenu">⚙️ ADMIN <span class="adm-seta">▾</span></button>
-  <div id="admMenu" role="dialog" aria-label="Painel de administração" hidden>
-    <div class="adm-topo"><b>Painel ADMIN</b><button id="admFechar" type="button" aria-label="Fechar o painel">✕ Fechar</button></div>
-    <section class="adm-sec adm-camp">
-      <h3>Campeonato aberto</h3>
-      <div class="adm-btns">
-        <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
-        <button id="nomesBtn" type="button">✏️ Editar nomes</button>
-        <button id="sortearBtn" type="button" class="ghost">🎲 Sortear de novo</button>
-        <button id="resetBtn" type="button" class="ghost">↺ Recomeçar</button>
-      </div>
-      <p class="dica">Edite nomes e placar direto na tabela (Enter passa para o placar de baixo). Toque no número da dupla para marcá-la vencedora.</p>
-    </section>
-    <p class="adm-home">Abra um campeonato para editar nomes, placar e AO VIVO.</p>
-    <section class="adm-sec">
-      <h3>Conta</h3>
-      <div class="adm-btns">
-        <button id="tentBtn" type="button" class="ghost">🔒 Segurança</button>
-        <button id="sairBtn" type="button" class="ghost">⏻ Sair</button>
-      </div>
-    </section>
-  </div>
-</div>
 
 <div id="atletasPanel" class="panel" role="dialog" aria-modal="true" aria-labelledby="atletasTit">
   <div class="card card-atletas">
@@ -783,7 +799,12 @@ function el(tag, cls, text){
 }
 const bracketEl = document.getElementById('bracket');
 
-let NUM = {}, tremer = null, focoPend = null;
+let NUM = {}, tremer = null, focoPend = null, toqueAlvo = null;
+// guarda em qual campo de placar a pessoa tocou: a tabela é redesenhada ao salvar o campo anterior
+bracketEl.addEventListener('pointerdown', (e) => {
+  const i = e.target.closest && e.target.closest('input.pts-in');
+  toqueAlvo = i ? {id: i.closest('.team').dataset.match, side: Number(i.closest('.team').dataset.side)} : null;
+}, true);
 function buildMatch(P, id){
   const parts = P[id];
   const aw = autoWin(parts), w = aw !== undefined ? aw : winners[id];
@@ -827,6 +848,12 @@ function placarValido(a, b){
   const w = Math.max(a, b), l = Math.min(a, b);
   return w >= 18 && (w === 18 ? l <= 16 : (w - l) === 2);
 }
+// placar parcial possível (jogo ainda rolando): ninguém chegou a 18, ou 17x17 em diante sem 2 pontos de diferença
+function placarAndamento(a, b){
+  if(a === null || b === null || a === undefined || b === undefined) return true;
+  const w = Math.max(a, b), l = Math.min(a, b);
+  return w <= 17 || (l >= 17 && w - l <= 1);
+}
 function aplicarFoco(){
   if(!focoPend) return;
   const f = focoPend; focoPend = null;
@@ -837,7 +864,7 @@ function criarPts(id, side){
   const sc = scores[id];
   const v = (sc && sc[side] !== null && sc[side] !== undefined) ? sc[side] : null;
   const o = (sc && sc[1 - side] !== null && sc[1 - side] !== undefined) ? sc[1 - side] : null;
-  const ruim = v !== null && o !== null && !placarValido(side === 0 ? v : o, side === 0 ? o : v);
+  const ruim = v !== null && o !== null && !placarValido(v, o) && !placarAndamento(v, o);
   if(adminMode){
     const inp = document.createElement('input');
     inp.type = 'number'; inp.min = 0; inp.max = 99; inp.className = 'pts pts-in' + (ruim ? ' invalido' : '');
@@ -845,6 +872,9 @@ function criarPts(id, side){
     inp.setAttribute('aria-label', 'Pontos');
     inp.addEventListener('change', () => {
       const t = inp.value.trim();
+      // se a pessoa já tocou em outro campo do placar, o cursor vai para ele depois de salvar
+      if(toqueAlvo && !(toqueAlvo.id === id && toqueAlvo.side === side)) focoPend = toqueAlvo;
+      toqueAlvo = null;
       setScore(id, side, t === '' ? null : Math.max(0, Math.min(99, parseInt(t, 10) || 0)));
     });
     inp.addEventListener('keydown', (e) => {
@@ -930,13 +960,6 @@ document.querySelectorAll('.fases button').forEach((b) => b.addEventListener('cl
   window.marcarFase = agendar;
 })();
 // ---------- painel ADMIN (abre e fecha) ----------
-const admToggle = document.getElementById('admToggle'), admMenu = document.getElementById('admMenu');
-function painelAdmin(abrir){ admMenu.hidden = !abrir; admToggle.setAttribute('aria-expanded', String(abrir)); document.body.classList.toggle('adm-aberto', abrir); }
-admToggle.addEventListener('click', () => painelAdmin(admMenu.hidden));
-document.getElementById('admFechar').addEventListener('click', () => painelAdmin(false));
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !admMenu.hidden) painelAdmin(false); });
-document.addEventListener('click', (e) => { if(!admMenu.hidden && !e.target.closest('#adminBar')) painelAdmin(false); });
-['nomesBtn', 'tentBtn'].forEach((id) => document.getElementById(id).addEventListener('click', () => painelAdmin(false)));
 
 function render(){
   atualizarAoVivo();
@@ -1098,6 +1121,8 @@ function setScore(id, side, val){
         winners[id] = w;
         limparAFrente(id, antes);
       }
+    } else if(placarAndamento(a, b)){
+      // jogo em andamento: o placar fica salvo e ninguém avança ainda
     } else {
       // placar impossível: o jogo treme e o cursor fica no campo para corrigir.
       // Se a dupla já tinha avançado, ela continua lá (nada à frente é apagado enquanto corrige).
@@ -1119,7 +1144,6 @@ bracketEl.addEventListener('click', (e) => {
 });
 
 // ---------- modo admin escondido ----------
-const adminDot = document.getElementById('adminDot');
 const senhaPanel = document.getElementById('senhaPanel');
 const senhaForm = document.getElementById('senhaForm');
 const senhaInput = document.getElementById('senhaInput');
@@ -1133,12 +1157,23 @@ const nomesSalvar = document.getElementById('nomesSalvar');
 const nomesFechar = document.getElementById('nomesFechar');
 
 const emailInput = document.getElementById('emailInput');
-adminDot.addEventListener('click', () => {
+function abrirLogin(){
   senhaMsg.textContent = ''; senhaMsg.className = '';
   senhaInput.value = '';
   senhaPanel.classList.add('open');
   (emailInput.value ? senhaInput : emailInput).focus();
-});
+}
+(function(){
+  const logo = document.querySelector('#home .logo');
+  let toques = 0, t0 = 0;
+  logo.addEventListener('click', () => {
+    if(adminMode) return;
+    const agora = Date.now();
+    toques = (agora - t0 < 700) ? toques + 1 : 1; t0 = agora;
+    if(toques >= 3){ toques = 0; abrirLogin(); }
+  });
+  if(location.hash === '#admin'){ history.replaceState(null, '', location.pathname + location.search); setTimeout(() => { if(!adminMode) abrirLogin(); }, 1200); }
+})();
 document.getElementById('senhaFechar').addEventListener('click', () => senhaPanel.classList.remove('open'));
 senhaPanel.addEventListener('click', (e) => { if(e.target === senhaPanel) senhaPanel.classList.remove('open'); });
 
@@ -1205,7 +1240,6 @@ document.getElementById('esqueciBtn').addEventListener('click', () => {
 });
 
 sairBtn.addEventListener('click', () => {
-  painelAdmin(false);
   adminMode = false;
   document.body.classList.remove('admin');
   try{ firebase.auth().signOut(); }catch(err){}
