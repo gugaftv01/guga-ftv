@@ -380,6 +380,18 @@ body.view-home .adm-home{display:block}
   #adminBar{right:8px!important;top:8px!important}
 }
 @media (prefers-reduced-motion:reduce){.trofeu span{animation:none}.bracket-scroll{scroll-behavior:auto}}
+/* ===== títulos das rodadas (Oitavas, Quartas, Semifinal, Final…) em destaque ===== */
+.col-label{display:block;width:max-content;max-width:100%;margin:0 auto 12px!important;padding:7px 16px 7px 18px;border-radius:999px;
+  font-size:11.5px!important;letter-spacing:.2em!important;text-indent:0!important;opacity:1!important;color:#241b06!important;
+  background:linear-gradient(100deg,#d9a632 0%,#f2c14e 35%,#fff0b8 50%,#f2c14e 65%,#d9a632 100%);background-size:250% 100%;
+  box-shadow:0 0 0 1px rgba(255,240,184,.5),0 4px 14px rgba(242,193,78,.35);text-shadow:0 1px 0 rgba(255,255,255,.35);
+  animation:rodadaBrilho 4s ease-in-out infinite}
+.grp-l .col-label{color:#3a0d06!important;background:linear-gradient(100deg,#e8775f 0%,#ff9d8a 35%,#ffd9cf 50%,#ff9d8a 65%,#e8775f 100%);background-size:250% 100%;
+  box-shadow:0 0 0 1px rgba(255,217,207,.5),0 4px 14px rgba(255,157,138,.35)}
+.col.center .col-label{font-size:12.5px!important;padding:8px 18px 8px 20px}
+@keyframes rodadaBrilho{0%,100%{background-position:100% 0}50%{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){.col-label{animation:none}}
+@media (max-width:720px){.col-label{font-size:10.5px!important;letter-spacing:.14em!important;padding:6px 12px}}
 </style>
 </head>
 <body class="view-home">
@@ -856,16 +868,19 @@ const atletasPanel = document.getElementById('atletasPanel'), atletasLista = doc
 function desenharAtletas(){
   const q = atletasBusca.value.trim().toLowerCase();
   const P = compute(), campea = campeao(P);
-  const duplas = LISTA.filter((d) => d && !d.bye).slice().sort((a, b) => a.s - b.s);
+  // número da inscrição: o que vem no começo do nome ("10. Arthur & ...") ou, se não tiver, o seed
+  const numDe = (d) => { const m = /^\s*(\d+)\s*[.)\-–]\s*/.exec(d.n); return m ? {n: +m[1], nome: d.n.slice(m[0].length)} : {n: d.s, nome: d.n}; };
+  const duplas = LISTA.filter((d) => d && !d.bye).slice().sort((a, b) => numDe(a).n - numDe(b).n || a.s - b.s);
   document.getElementById('atletasResumo').textContent = duplas.length + ' duplas · ' + (duplas.length * 2) + ' atletas';
   atletasLista.textContent = '';
   const vis = duplas.filter((d) => !q || d.n.toLowerCase().indexOf(q) >= 0 || String(d.s) === q);
   if(!vis.length){ const li = el('li', 'atl-vazio', 'Nenhum atleta encontrado.'); atletasLista.append(li); return; }
   vis.forEach((d) => {
     const li = el('li', 'atl' + (campea && campea.s === d.s ? ' atl-campea' : ''));
-    li.append(el('span', 'seed', String(d.s)));
+    const nd = numDe(d);
+    li.append(el('span', 'seed', String(nd.n)));
     const nomes = el('span', 'atl-nomes');
-    d.n.split(/\s*(?:&|\be\b|\/)\s*/i).filter(Boolean).forEach((a) => nomes.append(el('span', 'atl-nome', a)));
+    nd.nome.split(/\s*(?:&|\be\b|\/)\s*/i).filter(Boolean).forEach((a) => nomes.append(el('span', 'atl-nome', a)));
     li.append(nomes);
     if(campea && campea.s === d.s) li.append(el('span', 'atl-tag', '🏆 Campeã'));
     atletasLista.append(li);
