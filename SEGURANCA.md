@@ -1,7 +1,7 @@
 # Segurança do site GUGA01FTV
 
 ## Área do organizador (modo admin)
-- Não há botão de administração visível. Na primeira tela, toque **3 vezes seguidas na bola do topo** (ou abra o link terminando em **#admin**) e entre com **e-mail e senha** do Firebase.
+- Na primeira tela, toque na aba **🔒 ADMIN** da barra do topo (ou 3 vezes na bola, ou no link terminando em **#admin**) e entre com **e-mail e senha** do Firebase. Sem a senha, ninguém passa da tela de entrada.
 - Depois de entrar, a **Administração** aparece parada na primeira tela (só para o organizador) e, dentro de cada campeonato, acima da tabela. Nada fica flutuando.
   Não existe mais senha escrita no código.
 - Organizador: a conta de acesso do futvôlei, identificada nas regras pelo código da conta (UID), sem o e-mail aparecer no código.
