@@ -24,8 +24,9 @@
   1) O modo admin usa login do Firebase (e-mail e senha). Veja SEGURANCA.md.
   2) No Google Sites: Inserir → Incorporar → Incorporar código → cole
      TODO este arquivo. Sugestão de altura do quadro: ~680px.
-  3) MODO ADMIN (escondido): clique na bolinha quase invisível no canto
-     inferior direito e entre com o seu e-mail e senha.
+  3) MODO ADMIN: toque na aba "🔒 ADMIN" no canto inferior direito e entre
+     com o seu e-mail e senha. Depois, o botão "⚙️ ADMIN" (canto de cima) abre
+     e fecha o painel com todas as opções.
        • EDITAR NOMES: clique em "Editar nomes", altere o nome de qualquer
          dupla e clique em "Salvar".
        • RESULTADOS: clique na dupla vencedora de cada jogo — o vencedor
@@ -290,6 +291,95 @@ body::after{animation:giraBolaCentro 45s linear infinite}
 #adminBar button#aoVivoBtn{background:transparent;color:var(--gold-2);border:1px solid var(--gold-dim)}
 #adminBar button#aoVivoBtn.on{background:#d42b2b;color:#fff;border-color:#ff7b7b}
 @media (prefers-reduced-motion: reduce){.live-tag::before{animation:none}}
+
+/* ===== 1) atletas mais visíveis ===== */
+#bracket{--cw:250px}
+#bracket.adm{--cw:270px}
+.match{gap:3px!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.team{height:36px!important;font-size:14px!important}
+.team .seed{min-width:32px!important;font-size:12px!important;font-weight:800;background:var(--gold)!important;color:#241b06!important}
+.team .nome{line-height:36px!important;background:#1e5a64!important;color:#fff;font-weight:600;border-top:1px solid rgba(255,255,255,.16)}
+.team .nome-in{height:36px!important;background:#1e5a64!important;color:#fff}
+.team .pts{line-height:36px!important;min-width:36px!important;font-size:14px!important}
+.team.tbd .seed{background:rgba(0,0,0,.3)!important;color:var(--dim)!important}
+.team.tbd .nome{background:rgba(255,255,255,.08)!important;color:var(--dim);font-weight:400;border-top-color:transparent}
+.team.winner .nome,.team.winner .nome-in{background:rgba(242,193,78,.34)!important;color:#fff3c9!important}
+.team.winner .seed{background:var(--gold-2)!important}
+.final-card .team{height:42px!important;font-size:15.5px!important}
+.final-card .team .nome,.final-card .team .pts{line-height:42px!important}
+.final-card .team .nome-in{height:42px!important}
+/* botão e lista de atletas */
+.vista-acoes{display:flex;justify-content:center;margin-top:12px}
+#atletasBtn{background:rgba(242,193,78,.14);color:var(--gold-2);border:1.5px solid var(--gold);border-radius:999px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer;transition:background .2s,transform .2s}
+#atletasBtn:hover,#atletasBtn:focus-visible{background:var(--gold);color:#241b06;transform:translateY(-2px);outline:none}
+.card-atletas{width:min(520px,100%);max-height:88vh;display:flex;flex-direction:column}
+.atl-resumo{color:var(--dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:-4px 0 10px}
+#atletasBusca{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--gold-dim);background:#072530;color:var(--ink);font-size:15px;outline:none;margin-bottom:10px}
+#atletasBusca:focus{border-color:var(--gold)}
+.atl-lista{list-style:none;overflow:auto;flex:1;min-height:0;margin-bottom:12px;display:grid;gap:6px;padding-right:4px}
+.atl{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
+.atl .seed{flex:none;min-width:30px;font-size:12px;padding:4px}
+.atl-nomes{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:2px 10px}
+.atl-nome{font-weight:700;font-size:14.5px;color:#fff}
+.atl-nome+.atl-nome::before{content:"& ";color:var(--gold);font-weight:800}
+.atl-campea{border-color:var(--gold);background:rgba(242,193,78,.16)}
+.atl-tag{flex:none;font-size:11px;font-weight:800;color:#241b06;background:var(--gold);border-radius:999px;padding:3px 8px}
+.atl-vazio{color:var(--dim);text-align:center;padding:16px}
+/* ===== 2) troféu em destaque na Grande Final ===== */
+.grp-f .grp-title::before{content:"🏆 "}
+.trofeu{display:flex;justify-content:center;margin:0 0 10px;position:relative}
+.trofeu::before{content:"";position:absolute;left:50%;top:50%;width:150px;height:150px;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,217,122,.45),rgba(255,217,122,0));pointer-events:none}
+.trofeu span{position:relative;font-size:76px;line-height:1;filter:drop-shadow(0 0 20px rgba(242,193,78,.8));animation:brilhaTrofeu 2.6s ease-in-out infinite}
+@keyframes brilhaTrofeu{50%{transform:translateY(-5px) scale(1.06);filter:drop-shadow(0 0 34px rgba(255,217,122,1))}}
+.champ .t{font-size:54px}
+/* ===== 3) painel ADMIN que abre e fecha ===== */
+body.admin{padding-top:22px}
+#adminBar{background:none!important;border:none!important;padding:0!important;left:auto!important;right:12px!important;top:12px!important;width:auto;color:var(--ink)}
+body.admin #adminBar{display:block!important}
+#admToggle{background:var(--gold)!important;color:#241b06!important;border:none;border-radius:999px!important;padding:10px 16px!important;font-weight:800;font-size:13px!important;letter-spacing:.08em;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
+#admToggle .adm-seta{display:inline-block;transition:transform .2s}
+body.adm-aberto #admToggle .adm-seta{transform:rotate(180deg)}
+#admMenu{position:absolute;right:0;top:calc(100% + 8px);width:min(360px,calc(100vw - 24px));background:#0b2f38;border:1px solid var(--gold);border-radius:16px;padding:14px;box-shadow:0 22px 60px rgba(0,0,0,.6);display:grid;gap:12px}
+#admMenu[hidden]{display:none}
+.adm-topo{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.adm-topo b{color:var(--gold);letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+#admFechar{background:transparent!important;color:var(--gold-2)!important;border:1px solid var(--gold-dim)!important;border-radius:999px!important;padding:6px 12px!important;font-size:12px!important}
+.adm-sec{border-top:1px solid rgba(242,193,78,.2);padding-top:10px}
+.adm-sec h3{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.adm-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adm-btns button{width:100%;padding:10px 8px!important;font-size:13px!important;border-radius:10px!important}
+#adminBar .dica{display:block;color:var(--dim);font-size:11.5px;line-height:1.45;margin-top:8px}
+.adm-home{display:none;color:var(--dim);font-size:12.5px;text-align:center;margin:0}
+body.view-home .adm-camp{display:none}
+body.view-home .adm-home{display:block}
+/* ===== 4) aba ADMIN visível (no lugar da bolinha escondida) ===== */
+#adminDot{width:auto!important;height:auto!important;opacity:1!important;right:14px!important;bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;padding:10px 16px;border-radius:999px!important;background:#0a2c35!important;border:1.5px solid var(--gold)!important;color:var(--gold-2);font-weight:800;font-size:12.5px;letter-spacing:.14em;box-shadow:0 8px 22px rgba(0,0,0,.45);transition:background .2s,color .2s,transform .2s}
+#adminDot:hover,#adminDot:focus-visible{background:var(--gold)!important;color:#241b06;transform:translateY(-2px);outline:none}
+/* ===== 5) celular ===== */
+.fases{position:relative;z-index:2;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:14px auto 0;padding:0 8px}
+.fases button{background:rgba(0,0,0,.25);color:var(--ink);border:1px solid var(--gold-dim);border-radius:999px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer}
+.fases button:hover,.fases button:focus-visible{border-color:var(--gold);color:var(--gold-2);outline:none}
+.fases .fase-final{border-color:var(--gold);color:var(--gold-2)}
+.arraste{display:none;text-align:center;color:var(--dim);font-size:11.5px;margin:10px 0 -6px;position:relative;z-index:2}
+.bracket-scroll{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-behavior:smooth}
+@media (max-width:720px){
+  body{padding:14px 8px calc(80px + env(safe-area-inset-bottom,0px))}
+  .arraste{display:block}
+  .kicker{font-size:10px;letter-spacing:.35em}
+  h1{font-size:clamp(26px,8.4vw,40px)}
+  .sub{font-size:10px;letter-spacing:.12em;gap:8px}
+  .sub::before,.sub::after{width:28px}
+  #bracket{--cw:252px;column-gap:44px}
+  #bracket.adm{--cw:266px}
+  .team{font-size:13.5px!important}
+  .team .nome{padding:0 7px!important}
+  .grp-cols{gap:26px!important}
+  .camp{aspect-ratio:4/5}
+  .home-h{margin-top:20px}
+  .card{padding:16px}
+  #adminBar{right:8px!important;top:8px!important}
+}
+@media (prefers-reduced-motion:reduce){.trofeu span{animation:none}.bracket-scroll{scroll-behavior:auto}}
 </style>
 </head>
 <body class="view-home">
@@ -308,7 +398,14 @@ body::after{animation:giraBolaCentro 45s linear infinite}
   <h1 id="tituloEl"></h1>
   <div class="sub" id="subEl"></div>
   <div class="live-tag" id="liveEl" hidden>AO VIVO</div>
+  <div class="vista-acoes"><button id="atletasBtn" type="button">👥 Ver atletas inscritos</button></div>
 </header>
+<nav class="fases" aria-label="Ir para a fase">
+  <button type="button" data-fase="grp-w">Vencedores</button>
+  <button type="button" data-fase="grp-f" class="fase-final">🏆 Grande Final</button>
+  <button type="button" data-fase="grp-l">Perdedores</button>
+</nav>
+<p class="arraste">↔ Arraste para os lados para ver a chave inteira</p>
 
 <div class="bracket-scroll">
   <div id="bracket" aria-label="Chaveamento do torneio"></div>
@@ -317,16 +414,41 @@ body::after{animation:giraBolaCentro 45s linear infinite}
 <footer><b id="footOrg"></b> · <span id="footNome"></span></footer>
 </div>
 
-<button id="adminDot" aria-label="."></button>
+<button id="adminDot" type="button" aria-label="Entrar na área de administração">🔒 ADMIN</button>
 
 <div id="adminBar">
-  <span><b>MODO ADMIN</b><span class="dica"> — edite nomes e placar direto na tabela (Enter passa para o placar de baixo); clique no número da dupla pra marcá-la vencedora.</span></span>
-  <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
-  <button id="nomesBtn">Editar nomes</button>
-  <button id="sortearBtn" class="ghost">🎲 Sortear de novo</button>
-  <button id="resetBtn" class="ghost">Recomeçar</button>
-  <button id="tentBtn" class="ghost">🔒 Segurança</button>
-  <button id="sairBtn" class="ghost">Sair</button>
+  <button id="admToggle" type="button" aria-expanded="false" aria-controls="admMenu">⚙️ ADMIN <span class="adm-seta">▾</span></button>
+  <div id="admMenu" role="dialog" aria-label="Painel de administração" hidden>
+    <div class="adm-topo"><b>Painel ADMIN</b><button id="admFechar" type="button" aria-label="Fechar o painel">✕ Fechar</button></div>
+    <section class="adm-sec adm-camp">
+      <h3>Campeonato aberto</h3>
+      <div class="adm-btns">
+        <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
+        <button id="nomesBtn" type="button">✏️ Editar nomes</button>
+        <button id="sortearBtn" type="button" class="ghost">🎲 Sortear de novo</button>
+        <button id="resetBtn" type="button" class="ghost">↺ Recomeçar</button>
+      </div>
+      <p class="dica">Edite nomes e placar direto na tabela (Enter passa para o placar de baixo). Toque no número da dupla para marcá-la vencedora.</p>
+    </section>
+    <p class="adm-home">Abra um campeonato para editar nomes, placar e AO VIVO.</p>
+    <section class="adm-sec">
+      <h3>Conta</h3>
+      <div class="adm-btns">
+        <button id="tentBtn" type="button" class="ghost">🔒 Segurança</button>
+        <button id="sairBtn" type="button" class="ghost">⏻ Sair</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="atletasPanel" class="panel" role="dialog" aria-modal="true" aria-labelledby="atletasTit">
+  <div class="card card-atletas">
+    <h2 id="atletasTit">Atletas inscritos</h2>
+    <p class="atl-resumo" id="atletasResumo"></p>
+    <input id="atletasBusca" class="txt" type="search" placeholder="Buscar atleta ou dupla…" autocomplete="off" aria-label="Buscar atleta">
+    <ol id="atletasLista" class="atl-lista"></ol>
+    <div class="row"><button type="button" id="atletasFechar" class="btn">Fechar</button></div>
+  </div>
 </div>
 
 <div id="tentPanel" class="panel" role="dialog" aria-modal="true" aria-label="Tentativas de login com senha errada">
@@ -729,6 +851,44 @@ aoVivoBtn.addEventListener('click', () => {
   estados[atual.id].aovivo = !estados[atual.id].aovivo;
   saveState(); atualizarAoVivo();
 });
+// ---------- atletas inscritos ----------
+const atletasPanel = document.getElementById('atletasPanel'), atletasLista = document.getElementById('atletasLista'), atletasBusca = document.getElementById('atletasBusca');
+function desenharAtletas(){
+  const q = atletasBusca.value.trim().toLowerCase();
+  const P = compute(), campea = campeao(P);
+  const duplas = LISTA.filter((d) => d && !d.bye).slice().sort((a, b) => a.s - b.s);
+  document.getElementById('atletasResumo').textContent = duplas.length + ' duplas · ' + (duplas.length * 2) + ' atletas';
+  atletasLista.textContent = '';
+  const vis = duplas.filter((d) => !q || d.n.toLowerCase().indexOf(q) >= 0 || String(d.s) === q);
+  if(!vis.length){ const li = el('li', 'atl-vazio', 'Nenhum atleta encontrado.'); atletasLista.append(li); return; }
+  vis.forEach((d) => {
+    const li = el('li', 'atl' + (campea && campea.s === d.s ? ' atl-campea' : ''));
+    li.append(el('span', 'seed', String(d.s)));
+    const nomes = el('span', 'atl-nomes');
+    d.n.split(/\s*(?:&|\be\b|\/)\s*/i).filter(Boolean).forEach((a) => nomes.append(el('span', 'atl-nome', a)));
+    li.append(nomes);
+    if(campea && campea.s === d.s) li.append(el('span', 'atl-tag', '🏆 Campeã'));
+    atletasLista.append(li);
+  });
+}
+document.getElementById('atletasBtn').addEventListener('click', () => { atletasBusca.value = ''; desenharAtletas(); atletasPanel.classList.add('open'); });
+atletasBusca.addEventListener('input', desenharAtletas);
+document.getElementById('atletasFechar').addEventListener('click', () => atletasPanel.classList.remove('open'));
+atletasPanel.addEventListener('click', (e) => { if(e.target === atletasPanel) atletasPanel.classList.remove('open'); });
+// ---------- ir para uma fase (útil no celular) ----------
+document.querySelectorAll('.fases button').forEach((b) => b.addEventListener('click', () => {
+  const g = bracketEl.querySelector('.' + b.dataset.fase);
+  if(g) g.scrollIntoView({behavior: 'smooth', block: 'nearest', inline: b.dataset.fase === 'grp-f' ? 'center' : 'start'});
+}));
+// ---------- painel ADMIN (abre e fecha) ----------
+const admToggle = document.getElementById('admToggle'), admMenu = document.getElementById('admMenu');
+function painelAdmin(abrir){ admMenu.hidden = !abrir; admToggle.setAttribute('aria-expanded', String(abrir)); document.body.classList.toggle('adm-aberto', abrir); }
+admToggle.addEventListener('click', () => painelAdmin(admMenu.hidden));
+document.getElementById('admFechar').addEventListener('click', () => painelAdmin(false));
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !admMenu.hidden) painelAdmin(false); });
+document.addEventListener('click', (e) => { if(!admMenu.hidden && !e.target.closest('#adminBar')) painelAdmin(false); });
+['nomesBtn', 'tentBtn'].forEach((id) => document.getElementById(id).addEventListener('click', () => painelAdmin(false)));
+
 function render(){
   atualizarAoVivo();
   const P = compute();
@@ -768,6 +928,8 @@ function render(){
   colunas(grupo('grp-l', 'Fase dos Perdedores', '← Quem perde aqui está eliminado (na semifinal, vai para o 3º lugar)'), COLS_L.slice().reverse());   // espelhado: a final fica junto do centro
   const cf = grupo('grp-f', 'Grande Final', '');
   const col = el('div', 'col center');
+  const trofeu = el('div', 'trofeu'); trofeu.append(el('span', '', '🏆')); trofeu.setAttribute('aria-hidden', 'true');
+  col.append(trofeu);
   col.append(buildMatch(P, 'gf1'));
   if(P['gf2'][0] && P['gf2'][1]){
     col.append(el('div', 'col-label', 'Jogo extra'));
@@ -979,6 +1141,7 @@ document.getElementById('esqueciBtn').addEventListener('click', () => {
 });
 
 sairBtn.addEventListener('click', () => {
+  painelAdmin(false);
   adminMode = false;
   document.body.classList.remove('admin');
   try{ firebase.auth().signOut(); }catch(err){}
