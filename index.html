@@ -1011,15 +1011,32 @@ function desenharLinhas(P){
 }
 
 
+// Depois de mudar um resultado: só apaga vencedor e placar dos jogos à frente
+// em que as duplas mudaram. Se as mesmas duplas continuam no jogo, o placar fica.
+function limparAFrente(id, antes){
+  const desc = descendantsOf(id), chave = (t) => t ? (t.bye ? 'bye' : String(t.s)) : '';
+  let mudou = true;
+  while(mudou){
+    mudou = false;
+    const P = compute();
+    for(const d of desc){
+      const a = antes[d] || [], n = P[d] || [];
+      if((chave(a[0]) !== chave(n[0]) || chave(a[1]) !== chave(n[1])) && (winners[d] !== undefined || scores[d] !== undefined)){
+        delete winners[d]; delete scores[d]; mudou = true;
+      }
+    }
+  }
+}
 function toggleWinner(id, side){
+  const antes = compute();
   if(winners[id] === side){ delete winners[id]; } else { winners[id] = side; }
-  // Resultados à frente que dependiam deste jogo deixam de valer:
-  for(const d of descendantsOf(id)){ delete winners[d]; delete scores[d]; }
+  limparAFrente(id, antes);
   saveState();
   render();
 }
 
 function setScore(id, side, val){
+  const antes = compute();
   const cur = scores[id] || [null, null];
   cur[side] = val;
   if(cur[0] === null && cur[1] === null){ delete scores[id]; } else { scores[id] = cur; }
@@ -1029,14 +1046,11 @@ function setScore(id, side, val){
       const w = a > b ? 0 : 1;   // quem fez mais pontos avança
       if(winners[id] !== w){
         winners[id] = w;
-        for(const d of descendantsOf(id)){ delete winners[d]; delete scores[d]; }
+        limparAFrente(id, antes);
       }
     } else {
-      // placar impossível: ninguém avança, o jogo treme e o cursor fica no campo para corrigir
-      if(winners[id] !== undefined){
-        delete winners[id];
-        for(const d of descendantsOf(id)){ delete winners[d]; delete scores[d]; }
-      }
+      // placar impossível: o jogo treme e o cursor fica no campo para corrigir.
+      // Se a dupla já tinha avançado, ela continua lá (nada à frente é apagado enquanto corrige).
       tremer = id; focoPend = {id: id, side: side};
     }
   }
