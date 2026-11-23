@@ -5,7 +5,7 @@
 
     "chaveamento": {
       ".read": true,
-      ".write": "auth != null && auth.token.email === 'vitinhovenanciodesouza317@gmail.com'"
+      ".write": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'"
     },
 
     "bola": {
@@ -21,8 +21,8 @@
     },
 
     "tentativas": {
-      ".read": "auth != null && auth.token.email === 'vitinhovenanciodesouza317@gmail.com'",
-      ".write": "auth != null && auth.token.email === 'vitinhovenanciodesouza317@gmail.com'",
+      ".read": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
+      ".write": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
       ".indexOn": ["quando"],
       "$id": {
         ".write": "!data.exists() && newData.exists()",
