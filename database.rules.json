@@ -20,6 +20,19 @@
       "$outro": { ".validate": false }
     },
 
+    "acessos": {
+      ".read": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
+      ".write": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
+      ".indexOn": ["quando"],
+      "$id": {
+        ".validate": "newData.hasChildren(['uid', 'aparelho', 'quando']) && newData.child('uid').val() === auth.uid && newData.child('quando').val() === now",
+        "uid": { ".validate": "newData.isString()" },
+        "aparelho": { ".validate": "newData.isString() && newData.val().length <= 100" },
+        "quando": { ".validate": "newData.isNumber()" },
+        "$outro": { ".validate": false }
+      }
+    },
+
     "tentativas": {
       ".read": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
       ".write": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
