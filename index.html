@@ -1276,6 +1276,8 @@ function marcarUso(){ try{ localStorage.setItem('ftv_uso', String(Date.now())); 
 function tempoSemUso(){ try{ return Date.now() - (+localStorage.getItem('ftv_uso') || 0); }catch(e){ return 0; } }
 ['click', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { if(adminMode) marcarUso(); }, {passive: true}));
 setInterval(() => { if(adminMode && tempoSemUso() > INATIVO_MS){ sairBtn.click(); alert('Você saiu do modo organizador por ficar muito tempo sem usar. Entre de novo.'); } }, 60000);
+// contas que podem gravar no banco (as mesmas das regras em database.rules.json)
+const ORGANIZADORES = ['avff5wdGl1RyJRldSsifL7SvVOa2'];
 function registrarAcesso(){
   try{ const u = firebase.auth().currentUser; firebase.database().ref('acessos').push({uid: u.uid, aparelho: aparelho().slice(0, 100), quando: firebase.database.ServerValue.TIMESTAMP}); }catch(err){}
 }
@@ -1305,7 +1307,15 @@ senhaForm.addEventListener('submit', (e) => {
   if(!email || !senha){ senhaMsg.textContent = 'Digite o e-mail e a senha.'; tremerSenha(); return; }
   if(typeof firebase === 'undefined' || !firebase.auth){ senhaMsg.textContent = 'Sem internet. Tente de novo.'; return; }
   senhaMsg.textContent = 'Entrando…';
-  firebase.auth().signInWithEmailAndPassword(email, senha).then(() => { senhaMsg.textContent = ''; entrarAdmin(); registrarAcesso(); }).catch((err) => {
+  firebase.auth().signInWithEmailAndPassword(email, senha).then((cred) => {
+    // só a conta do organizador pode gravar no banco: outra conta nem entra no modo organizador
+    if(!cred.user || ORGANIZADORES.indexOf(cred.user.uid) < 0){
+      firebase.auth().signOut();
+      senhaMsg.textContent = 'Esta conta não é a do organizador. Entre com o e-mail de organizador do futvôlei.';
+      senhaInput.value = ''; tremerSenha(); return;
+    }
+    senhaMsg.textContent = ''; entrarAdmin(); registrarAcesso();
+  }).catch((err) => {
     const cod = err && err.code || '';
     senhaMsg.textContent = cod === 'auth/too-many-requests' ? 'Muitas tentativas. Espere alguns minutos.' : cod === 'auth/network-request-failed' ? 'Sem internet. Tente de novo.' : 'E-mail ou senha incorretos.';
     senhaInput.value = '';
@@ -1793,6 +1803,7 @@ function nuvemAtualizarTela(qtdAntes){
     firebase.auth().onAuthStateChanged((u) => {
       const inicial = authInicial; authInicial = false;
       if(!inicial || !u || adminMode) return;
+      if(ORGANIZADORES.indexOf(u.uid) < 0){ firebase.auth().signOut(); return; }   // conta que não pode gravar: sai
       if(tempoSemUso() > INATIVO_MS){ firebase.auth().signOut(); return; }   // ficou muito tempo sem uso: pede login de novo
       entrarAdmin();
     });
