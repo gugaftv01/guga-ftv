@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ativar avisos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg: #062833; --card: #0e3540; --ink: #eaf4f4; --dim: #8fb3b5; --gold: #f2c14e; }
+  * { box-sizing: border-box; margin: 0 }
+  body { min-height: 100vh; background: linear-gradient(165deg, #062833, #10484f); color: var(--ink);
+         font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px 16px; display: grid; place-items: center }
+  main { width: min(460px, 100%); background: var(--card); border: 1px solid var(--gold); border-radius: 16px; padding: 22px; display: grid; gap: 14px }
+  h1 { font-size: 20px; color: var(--gold) }
+  p, li { color: var(--dim); line-height: 1.5; font-size: 14.5px }
+  ol { padding-left: 20px; display: grid; gap: 6px }
+  b { color: var(--ink) }
+  label { font-weight: 700; font-size: 14px }
+  input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(242,193,78,.5); background: #072530; color: var(--ink); font-size: 16px }
+  input:focus { outline: none; border-color: var(--gold) }
+  button { padding: 13px; border: 0; border-radius: 999px; background: var(--gold); color: #241b06; font-weight: 800; font-size: 15px; cursor: pointer }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ativar os avisos por e-mail</h1>
+  <p>Página temporária para ativar os avisos de acesso dos sites. O seu e-mail é digitado aqui e enviado só para o FormSubmit: ele <b>não fica gravado</b> no código do site.</p>
+  <form id="f" method="POST">
+    <input type="hidden" name="_subject" value="Ativação dos avisos de acesso (IASD Primavera e Futvôlei)">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="Mensagem" value="Ativação dos avisos de acesso dos sites IASD Primavera e Futvôlei.">
+    <label for="em">Seu e-mail</label>
+    <input id="em" type="email" required autocomplete="email" placeholder="voce@gmail.com" style="margin:8px 0 14px">
+    <button type="submit">Enviar pedido de ativação</button>
+  </form>
+  <ol>
+    <li>Toque em <b>Enviar pedido de ativação</b>.</li>
+    <li>Abra o e-mail do <b>FormSubmit</b> (veja também o spam) e toque em <b>Activate Form</b>.</li>
+    <li>O FormSubmit mostra um <b>código</b> (uma sequência de letras e números) para usar no lugar do e-mail. Mande esse código para o Claude.</li>
+  </ol>
+</main>
+<script>
+  document.getElementById('f').addEventListener('submit', function (e) {
+    var em = document.getElementById('em').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { e.preventDefault(); alert('Digite um e-mail válido.'); return; }
+    this.action = 'https://formsubmit.co/' + encodeURIComponent(em);
+  });
+</script>
+</body>
+</html>

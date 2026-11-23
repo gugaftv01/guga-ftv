@@ -20,6 +20,16 @@
       "$outro": { ".validate": false }
     },
 
+    "online": {
+      ".read": true,
+      "$id": {
+        ".write": "!data.exists() || !newData.exists()",
+        ".validate": "newData.hasChildren(['t']) && newData.child('t').val() === now",
+        "t": { ".validate": "newData.isNumber()" },
+        "$outro": { ".validate": false }
+      }
+    },
+
     "acessos": {
       ".read": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
       ".write": "auth != null && auth.uid === 'avff5wdGl1RyJRldSsifL7SvVOa2'",
