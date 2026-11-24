@@ -452,6 +452,10 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
 #admCamp .versao{float:right;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--dim);font-weight:600}
 .team .nome.vaga{font-size:11px;font-style:italic;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:720px){.team .nome.vaga{font-size:10.5px!important}}
+/* ===== chave mais limpa: sem a caixa de posição; etiqueta da partida "P1" ===== */
+#bracket .team .seed{display:none!important}
+#bracket .team .nome{border-radius:6px!important}
+.mnum{white-space:nowrap;font-weight:800;color:var(--gold-2);opacity:.95}
 </style>
 </head>
 <body class="view-home">
@@ -834,6 +838,8 @@ bracketEl.addEventListener('pointerdown', (e) => {
   const i = e.target.closest && e.target.closest('input.pts-in');
   toqueAlvo = i ? {id: i.closest('.team').dataset.match, side: Number(i.closest('.team').dataset.side)} : null;
 }, true);
+// Mostra o nome sem o número de inscrição na frente (ex.: "20. Leandro & Fábio" -> "Leandro & Fábio").
+function nomeCurto(n){ return String(n == null ? '' : n).replace(/^\s*\d+\s*[.)\-\u2013]\s*/, ''); }
 // Texto da vaga ainda vazia: "Vencedor do jogo X" ou "Perdedor do jogo X" (X = número do jogo na chave).
 function vagaTexto(id, side){
   const def = MATCHES.find((m) => m.id === id);
@@ -841,7 +847,7 @@ function vagaTexto(id, side){
   if(!src || src.t === 'slot') return 'A definir';
   const n = NUM[src.m];
   if(!n) return 'A definir';   // vem de um jogo que não aparece (cabeça de chave)
-  return (src.t === 'W' ? 'Vencedor do jogo ' : 'Perdedor do jogo ') + n;
+  return (src.t === 'W' ? 'Vencedor da P' : 'Perdedor da P') + n;
 }
 function buildMatch(P, id){
   const parts = P[id];
@@ -849,7 +855,7 @@ function buildMatch(P, id){
   const kind = id.charAt(0);   // w = vencedores, l = perdedores, g = grande final
   const card = el('div', 'match m-' + kind + (kind === 'g' ? ' final-card' : ''));
   card.dataset.match = id;
-  if(NUM[id]){ card.append(el('span', 'mnum', String(NUM[id]))); }
+  if(NUM[id]){ card.append(el('span', 'mnum', 'P' + NUM[id])); }
   for(let side = 0; side < 2; side++){
     const team = parts[side];
     const isBye = !!(team && team.bye);
@@ -862,7 +868,7 @@ function buildMatch(P, id){
     row.dataset.match = id; row.dataset.side = side;
     row.append(el('span', 'seed', team && !isBye ? String(team.s) : '–'));
     if(adminMode && team && !isBye){ row.append(criarNomeInput(team)); }
-    else { row.append(el('span', 'nome' + (team || isBye ? '' : ' vaga'), isBye ? 'Cabeça de chave' : (team ? team.n : vagaTexto(id, side)))); }
+    else { row.append(el('span', 'nome' + (team || isBye ? '' : ' vaga'), isBye ? 'Cabeça de chave' : (team ? nomeCurto(team.n) : vagaTexto(id, side)))); }
     if(team && !isBye && aw === undefined){ row.append(criarPts(id, side)); } else { row.append(el('span', 'pts vazio')); }
     card.append(row);
   }
@@ -1164,8 +1170,8 @@ function render(){
     box.append(fe);
   } else { box.append(el('div', 't', '🏆')); }
   box.append(el('div', 'lbl', 'Campeão'));
-  box.append(el('div', 'n', champ ? champ.n : 'A definir'));
-  box.append(el('div', 's', champ ? 'Seed ' + champ.s : 'Aguarde a final'));
+  box.append(el('div', 'n', champ ? nomeCurto(champ.n) : 'A definir'));
+  box.append(el('div', 's', champ ? '' : 'Aguarde a final'));
   if(adminMode){
     const fb = el('div', 'foto-btns');
     const b1 = el('button', '', foto ? '📷 Trocar foto' : '📷 Foto da dupla'); b1.type = 'button';
