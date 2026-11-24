@@ -449,6 +449,7 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
 .match.treme .team .seed,.match.ruim .team .seed{background:#ff3b30!important;color:#fff!important}
 .match.treme input.pts-in,.match.ruim input.pts-in,input.pts-in.invalido{background:#ff3b30!important;color:#fff!important;box-shadow:inset 0 0 0 2px #ffd0cc!important}
 .pts-aviso{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:6;background:#5a1410;color:#fff;border:1px solid #ff6b5b;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:700;line-height:1.35;box-shadow:0 8px 20px rgba(0,0,0,.45)}
+#admCamp .versao{float:right;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--dim);font-weight:600}
 </style>
 </head>
 <body class="view-home">
@@ -483,7 +484,7 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
   <div class="vista-acoes"><button id="atletasBtn" type="button">👥 Ver atletas inscritos</button></div>
 </header>
 <section id="admCamp" aria-label="Administração deste campeonato">
-  <h3>⚙️ Administração deste campeonato</h3>
+  <h3>⚙️ Administração deste campeonato <span class="versao">versão 24/11 · 16h</span></h3>
   <div class="adm-btns">
     <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
     <button id="nomesBtn" type="button">✏️ Editar nomes</button>
@@ -934,22 +935,28 @@ function criarPts(id, side){
     };
     // fora das regras: treme forte e fica vermelho na hora em que digita
     const conferir = () => { const st = situacao(inp.value); marcar(st === 'erro'); if(st === 'erro') sacudirJogo(id); };
-    // ao tocar no campo, o número que já estava fica selecionado: o que for digitado substitui
-    let novo = '', digitou = false;
-    inp.addEventListener('focus', () => { digitou = false; setTimeout(() => { if(!digitou){ try{ inp.select(); }catch(e){} } }, 0); });
+    // Funciona como um placar: cada vez que clica/toca no campo, o que for digitado começa um número novo
+    // (não junta com o número que já estava). No máximo 2 dígitos.
+    let fresco = false, eraFresco = false, antes = '', novo = '';
+    const selecionar = () => { try{ inp.select(); }catch(e){} };
+    inp.addEventListener('focus', () => { fresco = true; setTimeout(() => { if(fresco) selecionar(); }, 0); });
+    inp.addEventListener('click', () => { fresco = true; selecionar(); });
     inp.addEventListener('beforeinput', (e) => {
-      novo = ''; digitou = true;
-      if(typeof e.data !== 'string' || e.data === '') return;
+      eraFresco = fresco; fresco = false; antes = inp.value; novo = '';
+      if(typeof e.data !== 'string' || e.data === '') return;   // apagar etc.: normal
       // letras e símbolos não entram: só números
-      if(/[^0-9]/.test(e.data)){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); return; }
+      if(/[^0-9]/.test(e.data)){ e.preventDefault(); fresco = eraFresco; sacudirJogo(id, 'Só números no placar.'); return; }
       novo = e.data;
     });
     inp.addEventListener('input', () => {
       let t = inp.value.replace(/\D+/g, '');
-      // passou de 2 dígitos (ex.: tinha 18 e digitou 0): começa de novo com o número digitado
-      if(t.length > 2) t = (novo || t.slice(-1)).slice(-2);
+      if(novo){
+        if(eraFresco) t = novo.slice(-2);                         // primeiro número depois de clicar: começa do zero
+        else if(t.length > 2) t = antes.replace(/\D+/g, '');      // já tinha 2 dígitos: o 3º não entra
+      }
+      t = t.slice(0, 2);
       if(t !== inp.value) inp.value = t;
-      novo = '';
+      novo = ''; eraFresco = false;
       conferir();
     });
     inp.addEventListener('keydown', (e) => {
