@@ -458,8 +458,7 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
   <div class="topbar"><span class="logo"></span><span class="topbar-t">Futvôlei · Campeonatos</span><button id="admAba" type="button" aria-expanded="false" aria-controls="adminBar">🔒 ADMIN</button></div>
   <div id="adminBar">
     <div id="admMenu" aria-label="Administração">
-      <div class="adm-topo"><b>⚙️ Administração</b><span class="adm-ok">Só você vê esta parte</span></div>
-      <p class="adm-home">Toque num campeonato abaixo para editar os nomes, o placar e ligar o AO VIVO.</p>
+      <div class="adm-topo"><b>⚙️ Administração</b></div>
       <section class="adm-sec">
         <h3>Conta</h3>
         <div class="adm-btns">
@@ -484,14 +483,13 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
   <div class="vista-acoes"><button id="atletasBtn" type="button">👥 Ver atletas inscritos</button></div>
 </header>
 <section id="admCamp" aria-label="Administração deste campeonato">
-  <h3>⚙️ Administração deste campeonato <span class="versao">versão 24/11 · 16h</span></h3>
+  <h3>⚙️ Administração deste campeonato</h3>
   <div class="adm-btns">
     <button id="aoVivoBtn" type="button">⚪ OFFLINE</button>
     <button id="nomesBtn" type="button">✏️ Editar nomes</button>
     <button id="sortearBtn" type="button" class="ghost">🎲 Sortear de novo</button>
     <button id="resetBtn" type="button" class="ghost">↺ Recomeçar</button>
   </div>
-  <p class="dica">Digite o placar direto na tabela (só números): ele fica salvo na hora, mesmo com o jogo em andamento. O jogo vai até 18; se empatar em 17×17, continua até alguém abrir 2 pontos, e aí a dupla avança sozinha. Placar impossível não é salvo: o jogo treme e fica vermelho para corrigir.</p>
 </section>
 <nav class="fases" aria-label="Ir para a fase">
   <button type="button" data-fase="grp-w">Vencedores</button>
@@ -504,7 +502,6 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
   <button type="button" id="zoomMais" aria-label="Aumentar a tabela">+</button>
   <button type="button" id="zoomTudo">⤢ Tabela inteira</button>
 </div>
-<p class="arraste">👆 Arraste para qualquer lado · use dois dedos para aumentar ou diminuir</p>
 
 <div class="bracket-scroll">
   <div id="zoomBox"><div id="bracket" aria-label="Chaveamento do torneio"></div></div>
@@ -557,7 +554,6 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
       <button type="submit" class="btn">Salvar</button>
       <button type="button" id="nomeFechar" class="btn ghost">Cancelar</button>
     </div>
-    <div class="hint">Esse nome aparece no título da tela do chaveamento.</div>
   </form>
 </div>
 
@@ -587,7 +583,6 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
       <button id="nomesSalvar" class="btn">Salvar</button>
       <button id="nomesFechar" class="btn ghost">Cancelar</button>
     </div>
-    <div class="hint">Deixe um campo vazio para voltar ao nome original da lista.</div>
   </div>
 </div>
 
@@ -861,7 +856,7 @@ function buildMatch(P, id){
     card.append(row);
   }
   const sc = scores[id];   // placar salvo impossível (de antes): o quadrado já aparece vermelho
-  if(sc && sc[0] !== null && sc[1] !== null && sc[0] !== undefined && sc[1] !== undefined && !placarValido(sc[0], sc[1]) && !placarAndamento(sc[0], sc[1])) card.classList.add('ruim');
+  if(sc && sc[0] !== null && sc[1] !== null && sc[0] !== undefined && sc[1] !== undefined && !placarValido(sc[0], sc[1])) card.classList.add('ruim');
   return card;
 }
 function criarNomeInput(team){
@@ -876,28 +871,19 @@ function criarNomeInput(team){
   inp.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ inp.blur(); } });
   return inp;
 }
-// placar válido: vai até 18; se chegar em 17x17 segue até abrir 2 pontos de diferença
+// Regra oficial do futvôlei: set único de 18 pontos, com diferença mínima de 2 pontos.
+// Empate em 17x17: o jogo continua até alguém abrir 2 pontos (19x17, 20x18, 21x19...).
+// Placar certo = jogo terminado: 18 x 0..16, ou acima de 18 com exatamente 2 de diferença.
 function placarValido(a, b){
   if(a === null || b === null || a === undefined || b === undefined || a === b) return false;
   const w = Math.max(a, b), l = Math.min(a, b);
   return w >= 18 && (w === 18 ? l <= 16 : (w - l) === 2);
 }
-// placar parcial possível (jogo ainda rolando): ninguém chegou a 18, ou 17x17 em diante sem 2 pontos de diferença
-function placarAndamento(a, b){
-  if(a === null || b === null || a === undefined || b === undefined) return true;
-  const w = Math.max(a, b), l = Math.min(a, b);
-  return w <= 17 || (l >= 17 && w - l <= 1);
-}
-const AVISO_PLACAR = 'Placar inválido: o jogo vai até 18. No 17×17, segue até alguém abrir 2 pontos.';
-function sacudirJogo(id, msg){
+function sacudirJogo(id){
   const c = bracketEl.querySelector('.match[data-match="' + id + '"]'); if(!c) return;
   c.classList.remove('treme'); void c.offsetWidth; c.classList.add('treme');
   try{ if(navigator.vibrate) navigator.vibrate([90, 50, 90, 50, 120]); }catch(e){}
   clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('treme'), 950);
-  let av = c.querySelector('.pts-aviso');
-  if(!av){ av = el('div', 'pts-aviso'); av.setAttribute('role', 'alert'); c.append(av); }
-  av.textContent = msg || AVISO_PLACAR;
-  clearTimeout(c._a); c._a = setTimeout(() => av.remove(), 3200);
 }
 function aplicarFoco(){
   if(!focoPend) return;
@@ -909,7 +895,7 @@ function criarPts(id, side){
   const sc = scores[id];
   const v = (sc && sc[side] !== null && sc[side] !== undefined) ? sc[side] : null;
   const o = (sc && sc[1 - side] !== null && sc[1 - side] !== undefined) ? sc[1 - side] : null;
-  const ruim = v !== null && o !== null && !placarValido(v, o) && !placarAndamento(v, o);
+  const ruim = v !== null && o !== null && !placarValido(v, o);
   if(adminMode){
     const inp = document.createElement('input');
     // teclado de números com a tecla ↩ para confirmar (o teclado só de números do iPhone não tem essa tecla)
@@ -927,9 +913,9 @@ function criarPts(id, side){
     const situacao = (txt) => {
       if(txt === '') return 'ok';
       const n = parseInt(txt, 10), o2 = outroValor();
-      if(o2 === null || placarValido(n, o2) || placarAndamento(n, o2)) return 'ok';
+      if(o2 === null || placarValido(n, o2)) return 'ok';
       if(txt.length === 1){   // ex.: o outro tem 20 e foi digitado "1": ainda pode virar 18
-        for(let k = 0; k <= 9; k++){ const m = n * 10 + k; if(placarValido(m, o2) || placarAndamento(m, o2)) return 'talvez'; }
+        for(let k = 0; k <= 9; k++){ if(placarValido(n * 10 + k, o2)) return 'talvez'; }
       }
       return 'erro';
     };
@@ -945,7 +931,7 @@ function criarPts(id, side){
       eraFresco = fresco; fresco = false; antes = inp.value; novo = '';
       if(typeof e.data !== 'string' || e.data === '') return;   // apagar etc.: normal
       // letras e símbolos não entram: só números
-      if(/[^0-9]/.test(e.data)){ e.preventDefault(); fresco = eraFresco; sacudirJogo(id, 'Só números no placar.'); return; }
+      if(/[^0-9]/.test(e.data)){ e.preventDefault(); fresco = eraFresco; sacudirJogo(id); return; }
       novo = e.data;
     });
     inp.addEventListener('input', () => {
@@ -960,13 +946,13 @@ function criarPts(id, side){
       conferir();
     });
     inp.addEventListener('keydown', (e) => {
-      if(e.key && e.key.length === 1 && !/[0-9]/.test(e.key) && !e.ctrlKey && !e.metaKey){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); }
+      if(e.key && e.key.length === 1 && !/[0-9]/.test(e.key) && !e.ctrlKey && !e.metaKey){ e.preventDefault(); sacudirJogo(id); }
     });
     inp.addEventListener('change', () => {
       const t = inp.value.replace(/\D+/g, '');
       const n = t === '' ? null : Math.min(99, parseInt(t, 10));
       const o2 = outroValor();
-      if(n !== null && o2 !== null && !placarValido(n, o2) && !placarAndamento(n, o2)){
+      if(n !== null && o2 !== null && !placarValido(n, o2)){
         // placar impossível: não salva, o quadrado do jogo treme e o cursor fica no campo para corrigir
         toqueAlvo = null; focoPend = null;
         marcar(true); sacudirJogo(id);
@@ -1272,11 +1258,10 @@ function setScore(id, side, val){
         winners[id] = w;
         limparAFrente(id, antes);
       }
-    } else if(placarAndamento(a, b)){
-      // jogo em andamento: o placar fica salvo e ninguém avança ainda
     } else {
-      // placar impossível: o jogo treme e o cursor fica no campo para corrigir.
-      // Se a dupla já tinha avançado, ela continua lá (nada à frente é apagado enquanto corrige).
+      // fora da regra: não salva, o jogo treme e o cursor fica no campo para corrigir
+      cur[side] = null;
+      if(cur[0] === null && cur[1] === null) delete scores[id];
       tremer = id; focoPend = {id: id, side: side};
     }
   }
