@@ -450,6 +450,8 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
 .match.treme input.pts-in,.match.ruim input.pts-in,input.pts-in.invalido{background:#ff3b30!important;color:#fff!important;box-shadow:inset 0 0 0 2px #ffd0cc!important}
 .pts-aviso{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:6;background:#5a1410;color:#fff;border:1px solid #ff6b5b;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:700;line-height:1.35;box-shadow:0 8px 20px rgba(0,0,0,.45)}
 #admCamp .versao{float:right;font-size:10px;letter-spacing:.06em;text-transform:none;color:var(--dim);font-weight:600}
+.team .nome.vaga{font-size:11px;font-style:italic;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:720px){.team .nome.vaga{font-size:10.5px!important}}
 </style>
 </head>
 <body class="view-home">
@@ -832,6 +834,15 @@ bracketEl.addEventListener('pointerdown', (e) => {
   const i = e.target.closest && e.target.closest('input.pts-in');
   toqueAlvo = i ? {id: i.closest('.team').dataset.match, side: Number(i.closest('.team').dataset.side)} : null;
 }, true);
+// Texto da vaga ainda vazia: "Vencedor do jogo X" ou "Perdedor do jogo X" (X = número do jogo na chave).
+function vagaTexto(id, side){
+  const def = MATCHES.find((m) => m.id === id);
+  const src = def ? (side === 0 ? def.a : def.b) : null;
+  if(!src || src.t === 'slot') return 'A definir';
+  const n = NUM[src.m];
+  if(!n) return 'A definir';   // vem de um jogo que não aparece (cabeça de chave)
+  return (src.t === 'W' ? 'Vencedor do jogo ' : 'Perdedor do jogo ') + n;
+}
 function buildMatch(P, id){
   const parts = P[id];
   const aw = autoWin(parts), w = aw !== undefined ? aw : winners[id];
@@ -851,7 +862,7 @@ function buildMatch(P, id){
     row.dataset.match = id; row.dataset.side = side;
     row.append(el('span', 'seed', team && !isBye ? String(team.s) : '–'));
     if(adminMode && team && !isBye){ row.append(criarNomeInput(team)); }
-    else { row.append(el('span', 'nome', isBye ? 'Cabeça de chave' : (team ? team.n : 'A definir'))); }
+    else { row.append(el('span', 'nome' + (team || isBye ? '' : ' vaga'), isBye ? 'Cabeça de chave' : (team ? team.n : vagaTexto(id, side)))); }
     if(team && !isBye && aw === undefined){ row.append(criarPts(id, side)); } else { row.append(el('span', 'pts vazio')); }
     card.append(row);
   }
