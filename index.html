@@ -456,6 +456,16 @@ body.adm-fechado #adminBar,body.adm-fechado #admCamp{display:none!important}
 #bracket .team .seed{display:none!important}
 #bracket .team .nome{border-radius:6px!important}
 .mnum{white-space:nowrap;font-weight:800;color:var(--gold-2);opacity:.95}
+/* ===== selo da partida (P1, P2...) visível, centralizado acima de cada jogo ===== */
+.mnum{position:absolute!important;left:50%!important;right:auto!important;top:-11px!important;bottom:auto!important;
+  transform:translateX(-50%)!important;font-family:inherit!important;font-size:10.5px!important;font-weight:800!important;
+  letter-spacing:.03em;line-height:1;opacity:1!important;color:#241b06!important;background:var(--gold)!important;
+  padding:3px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.5);z-index:7;white-space:nowrap;pointer-events:none}
+.grp-l .mnum{left:50%!important;right:auto!important}
+.col-body{gap:24px}
+.col-body>.match{margin-top:6px}
+.col.center .mnum{top:-12px!important;font-size:11px!important}
+@media (max-width:720px){.mnum{font-size:11px!important;padding:3px 10px}.col-body{gap:26px}}
 </style>
 </head>
 <body class="view-home">
@@ -1125,7 +1135,9 @@ function render(){
   const oculto = (id) => COLS_W[0].ids.indexOf(id) >= 0 && !!P[id] && !!((P[id][0] && P[id][0].bye) || (P[id][1] && P[id][1].bye));
   COLS_W.forEach((c) => c.ids.forEach((id) => { if(!oculto(id)) NUM[id] = ++k; }));
   COLS_L.forEach((c) => c.ids.forEach((id) => { NUM[id] = ++k; }));
-  NUM['gf1'] = ++k; NUM['gf2'] = ++k; NUM['t3'] = ++k;
+  if(MATCHES.some((m) => m.id === 't3')) NUM['t3'] = ++k;        // disputa de 3º/4º
+  NUM['gf1'] = ++k;                                              // GRANDE FINAL (última partida)
+  if(P['gf2'] && P['gf2'][0] && P['gf2'][1]) NUM['gf2'] = ++k;   // jogo extra, só quando acontece
   const grupo = (cls, titulo, sub) => {
     const g = el('section', 'grp ' + cls);
     g.append(el('h2', 'grp-title', titulo));
