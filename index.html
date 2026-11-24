@@ -922,22 +922,38 @@ function criarPts(id, side){
       m.classList.toggle('ruim', mal);
       m.querySelectorAll('input.pts-in').forEach((i) => i.classList.toggle('invalido', mal));
     };
-    // letras e símbolos não entram: só números
+    // o número digitado, pelas regras do futvôlei: 'ok', 'talvez' (ainda falta um dígito) ou 'erro'
+    const situacao = (txt) => {
+      if(txt === '') return 'ok';
+      const n = parseInt(txt, 10), o2 = outroValor();
+      if(o2 === null || placarValido(n, o2) || placarAndamento(n, o2)) return 'ok';
+      if(txt.length === 1){   // ex.: o outro tem 20 e foi digitado "1": ainda pode virar 18
+        for(let k = 0; k <= 9; k++){ const m = n * 10 + k; if(placarValido(m, o2) || placarAndamento(m, o2)) return 'talvez'; }
+      }
+      return 'erro';
+    };
+    // fora das regras: treme forte e fica vermelho na hora em que digita
+    const conferir = () => { const st = situacao(inp.value); marcar(st === 'erro'); if(st === 'erro') sacudirJogo(id); };
+    // ao tocar no campo, o número que já estava fica selecionado: o que for digitado substitui
+    let novo = '', digitou = false;
+    inp.addEventListener('focus', () => { digitou = false; setTimeout(() => { if(!digitou){ try{ inp.select(); }catch(e){} } }, 0); });
+    inp.addEventListener('beforeinput', (e) => {
+      novo = ''; digitou = true;
+      if(typeof e.data !== 'string' || e.data === '') return;
+      // letras e símbolos não entram: só números
+      if(/[^0-9]/.test(e.data)){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); return; }
+      novo = e.data;
+    });
     inp.addEventListener('input', () => {
-      const limpo = inp.value.replace(/\D+/g, '').slice(0, 2);
-      if(limpo !== inp.value){ inp.value = limpo; sacudirJogo(id, 'Só números no placar.'); }
-      if(inp.value === ''){ marcar(false); return; }
-      const n = parseInt(inp.value, 10), o2 = outroValor();
-      const mal = o2 !== null && !placarValido(n, o2) && !placarAndamento(n, o2);
-      marcar(mal);
-      if(mal && inp.value.length === 2) sacudirJogo(id);   // número completo e impossível: treme na hora
+      let t = inp.value.replace(/\D+/g, '');
+      // passou de 2 dígitos (ex.: tinha 18 e digitou 0): começa de novo com o número digitado
+      if(t.length > 2) t = (novo || t.slice(-1)).slice(-2);
+      if(t !== inp.value) inp.value = t;
+      novo = '';
+      conferir();
     });
     inp.addEventListener('keydown', (e) => {
       if(e.key && e.key.length === 1 && !/[0-9]/.test(e.key) && !e.ctrlKey && !e.metaKey){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); }
-    });
-    inp.addEventListener('beforeinput', (e) => {
-      if(typeof e.data !== 'string' || e.data === '') return;
-      if(/[^0-9]/.test(e.data)){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); }
     });
     inp.addEventListener('change', () => {
       const t = inp.value.replace(/\D+/g, '');
