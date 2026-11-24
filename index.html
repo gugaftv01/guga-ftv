@@ -1277,7 +1277,7 @@ function tempoSemUso(){ try{ return Date.now() - (+localStorage.getItem('ftv_uso
 ['click', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { if(adminMode) marcarUso(); }, {passive: true}));
 setInterval(() => { if(adminMode && tempoSemUso() > INATIVO_MS){ sairBtn.click(); alert('Você saiu do modo organizador por ficar muito tempo sem usar. Entre de novo.'); } }, 60000);
 // contas que podem gravar no banco (as mesmas das regras em database.rules.json)
-const ORGANIZADORES = ['avff5wdGl1RyJRldSsifL7SvVOa2'];
+const ORGANIZADORES = ['avff5wdGl1RyJRldSsifL7SvVOa2', 'gftmX0dZAkN9gXNe5Cpahlyr1lF2'];
 function registrarAcesso(){
   try{ const u = firebase.auth().currentUser; firebase.database().ref('acessos').push({uid: u.uid, aparelho: aparelho().slice(0, 100), quando: firebase.database.ServerValue.TIMESTAMP}); }catch(err){}
 }
