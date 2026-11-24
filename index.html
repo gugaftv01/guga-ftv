@@ -905,7 +905,8 @@ function criarPts(id, side){
   const ruim = v !== null && o !== null && !placarValido(v, o) && !placarAndamento(v, o);
   if(adminMode){
     const inp = document.createElement('input');
-    inp.type = 'text'; inp.inputMode = 'numeric'; inp.pattern = '[0-9]*'; inp.maxLength = 2;
+    // teclado de números com a tecla ↩ para confirmar (o teclado só de números do iPhone não tem essa tecla)
+    inp.type = 'number'; inp.min = 0; inp.max = 99; inp.step = 1;
     inp.autocomplete = 'off'; inp.className = 'pts pts-in' + (ruim ? ' invalido' : '');
     inp.value = v === null ? '' : v;
     inp.setAttribute('aria-label', 'Pontos');
@@ -923,6 +924,10 @@ function criarPts(id, side){
     });
     inp.addEventListener('keydown', (e) => {
       if(e.key && e.key.length === 1 && !/[0-9]/.test(e.key) && !e.ctrlKey && !e.metaKey){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); }
+    });
+    inp.addEventListener('beforeinput', (e) => {
+      if(typeof e.data !== 'string' || e.data === '') return;
+      if(/[^0-9]/.test(e.data)){ e.preventDefault(); sacudirJogo(id, 'Só números no placar.'); }
     });
     inp.addEventListener('change', () => {
       const t = inp.value.replace(/\D+/g, '');
